@@ -1,12 +1,12 @@
 
 # WebsocketProvider
+
+-------------
+
 An encapsulation of ios websocket client `Starscream` for custom API usage. 
 
-对iOS的Websocket客户端`Starscream`的功能封装，使调用Websocket API变得像HTTP API一样简单。
+对iOS Websocket客户端`Starscream`的功能封装，使调用Websocket API变得像HTTP API一样简单。
 
-
----
-# WebsocketProvider
 -------------
 
 
@@ -14,7 +14,7 @@ An encapsulation of ios websocket client `Starscream` for custom API usage.
 ### 示例:  
 ```swift
 WebSocketAPITool.request(target: MyAPI.test, plugins: []) { (dict) in
-	print("result:\(dict)")
+    print("result:\(dict)")
 }
 ```
 
@@ -35,9 +35,9 @@ WebSocketAPITool.request(target: MyAPI.test, plugins: []) { (dict) in
 ```json
     long uniqueId;  //终端每次请求生成唯一序列号
     String product; //产品代号
-    String service; //服务URI，由业务后端开发告知前端
+    String service; //服务URI，由业务后端开发提供
     String method;  //HTTP访问类型 GET POST PUT DELETE PATCH，不填则默认POST
-    String content; //服务需要的参数，JSON字符串，由业务后端开发告知前端
+    String content; //服务需要的参数，JSON字符串，由业务后端开发提供
 ```
 
 - 请求示例：
@@ -54,22 +54,56 @@ WebSocketAPITool.request(target: MyAPI.test, plugins: []) { (dict) in
 - 返回协议格式：
 
 ```json
-    ErrorCode error;//一级错误码，非业务错误，出现错误将会赋值
+    ErrorCode error;//顶层错误码，非业务错误，有错误时出现
     long uniqueId;  //原值返回
     String product; //原值返回
     String service; //原值返回
     String method;  //原值返回
-    String content; //内容格式由业务后端开发告知前端
-```
-```json
-ErrorCode{
-    int code; 	 //错误码: 1=非法协议体;2=服务繁忙;3=服务内部错误;4=请先登陆;...
-    String desc; //错误描述
-}
+    String content; //内容格式由业务后端开发提供
+    
+    // 错误
+    ErrorCode {
+        int code;    //错误码: 1=非法协议体; 2=服务繁忙; 3=服务内部错误; 4=请先登录; ...
+        String desc; //错误描述
+    }
+    
+    // 正常content示例
+    content: {
+        String ret_code;  // 业务状态码,一般"0000"表示成功
+        String ret_msg;   // 业务提示语
+        // (Object or Array): result; // 业务相关的对象或数组
+    }
 ```
 
-- 类结构图（待补充）
+- 类定义说明
 
+`WSWebSocketConnection` WebSocket连接实现类
+
+`NetworkListener` 网络状态监听器
+
+`WSConstants.swift` 常量配置
+
+`WSUniqueIDGenerator` 唯一ID生成器
+
+`WSAccessLayer` WebSocket请求处理层
+
+`WSDataParser` WebSocket数据解析器
+
+`WSResponse` WebSocket响应
+
+`WSErrorType` WebSocket错误类型(非业务错误)
+
+`WSRequest` WebSocket请求
+
+`WSTaskManager` 请求任务管理器
+
+`WSProvider` WebSocket API 提供类
+
+`WSTargetType` WebSocket接口表示协议
+
+`GCDDelayCancel.swift` 取消延时任务的扩展
+
+`WSPluginType` 请求插件表示协议
 
 
 ### 使用方法

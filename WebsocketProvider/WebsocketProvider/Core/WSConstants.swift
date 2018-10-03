@@ -49,7 +49,7 @@ extension URL {
 
 
 extension String {
-    /// WebSocket心跳
+    /// WebSocket心跳格式
     static var heartbeat: String {
         let dict: [String: Any] = [WSConstant.kService:     "system/heart-beat",
                                    WSConstant.kUniqueId:    WSUniqueIDGenerator.getID(),
@@ -59,15 +59,5 @@ extension String {
         let jsonData = try! JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
         let string = String(data: jsonData, encoding: .utf8)!
         return string
-    }
-    
-    /// 是否包含中文
-    var containsChinese: Bool {
-        for (_, value) in self.enumerated() {
-            if ("\u{4E00}" <= value  && value <= "\u{9FA5}") {
-                return true
-            }
-        }
-        return false
     }
 }

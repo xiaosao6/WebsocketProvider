@@ -94,3 +94,17 @@ extension WSDataParser: WSDataCodeable {
         return content
     }
 }
+
+
+
+fileprivate extension String {
+    /// 是否包含中文
+    var containsChinese: Bool {
+        for (_, value) in self.enumerated() {
+            if ("\u{4E00}" <= value  && value <= "\u{9FA5}") {
+                return true
+            }
+        }
+        return false
+    }
+}
