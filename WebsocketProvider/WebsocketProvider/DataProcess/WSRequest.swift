@@ -43,7 +43,7 @@ struct WSRequestHeader {
     let path: String
     /// 请求方法
     let method: WSMethod
-    /// 产品代号,如`小萝卜App`
+    /// 客户端代号,如`App_iOS`
     let product: String
 }
 
@@ -51,10 +51,13 @@ struct WSRequestHeader {
 /// 请求选项
 struct WSRequestOption {
     
-    /// 超时时间,0表示无需判断超时
+    /// 超时时间
     let timeOutInterval: TimeInterval
-    /// 是否需要重发
+    
+    //TODO: --
+    /// 失败后需要重发
     let needResend: Bool
+    //TODO: --
     /// 已重发次数
     var resendCount: Int
     

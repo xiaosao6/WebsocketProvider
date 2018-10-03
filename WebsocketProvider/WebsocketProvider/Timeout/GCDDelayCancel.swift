@@ -11,19 +11,19 @@ import Foundation
 
 extension DispatchWorkItem {
     
-    typealias CancelableBlock = (_ cancel: Bool) -> Void
+    typealias CancellableBlock = (_ cancel: Bool) -> Void
     
     /// 开启延时任务
     @discardableResult
-    static func gcdDelay(time: TimeInterval, task: DispatchWorkItem, queue: DispatchQueue = .main) -> CancelableBlock? {
+    static func gcdDelay(time: TimeInterval, task: DispatchWorkItem, queue: DispatchQueue = .main) -> CancellableBlock? {
         func dispatchLater(block: DispatchWorkItem) {
             queue.asyncAfter(deadline: .now() + time, execute: block)
         }
         
         var closure: DispatchWorkItem? = task
-        var result: CancelableBlock?
+        var result: CancellableBlock?
         
-        let delayedClosure: CancelableBlock = { cancel in
+        let delayedClosure: CancellableBlock = { cancel in
             if let internalClosure = closure {
                 if cancel == false {
                     queue.async(execute: internalClosure)
@@ -47,7 +47,7 @@ extension DispatchWorkItem {
     }
     
     /// 取消还未执行的延时任务
-    static func gcdCancel(task: CancelableBlock?) {
+    static func gcdCancel(task: CancellableBlock?) {
         task?(true)
     }
     

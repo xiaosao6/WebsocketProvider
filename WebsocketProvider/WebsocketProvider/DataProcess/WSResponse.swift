@@ -16,6 +16,7 @@ enum WSErrorType: Int {
     case reachableError     = -12 // 本地网络配置异常
     case serverApiError     = -13 // 服务端连接异常
     case responseInvalid    = -14
+    case requestCancelled   = -15
 }
 
 extension WSErrorType: CustomStringConvertible {
@@ -29,6 +30,8 @@ extension WSErrorType: CustomStringConvertible {
             return "接口连接失败"
         case .responseInvalid:
             return "响应数据解析异常"
+        case .requestCancelled:
+            return "请求已被取消"
         }
     }
 }

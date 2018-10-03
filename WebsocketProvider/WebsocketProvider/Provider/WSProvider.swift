@@ -39,12 +39,12 @@ class WSProvider<Target: WSTargetType> {
     }
     
     
-    
-    func request(_ target: Target, option: WSRequestOption = .`default`, completion: @escaping (_ result: Result<WebSocketResult>) -> Void) {
+    @discardableResult
+    func request(_ target: Target, option: WSRequestOption = .`default`, completion: @escaping (_ result: Result<WebSocketResult>) -> Void) -> TaskCancellable? {
         plugins.forEach { $0.willSend(target) }
         
         let request = WSRequest.requestWithTarget(target, option: option)
-        accessLayer.sendRequest(request) { [weak self] (rawResponse) in
+        let cancellable = accessLayer.sendRequest(request) { [weak self] (rawResponse) in
             if let error = rawResponse.error {
                 let result = Result<WebSocketResult>.failure(error)
                 self?.plugins.forEach { $0.willReceive(result, target: target) }
@@ -66,13 +66,13 @@ class WSProvider<Target: WSTargetType> {
                 return
             }
             
-            let value = WebSocketResult(path: rawResponse.path, content: jsonDict)
+            let value = WebSocketResult(path: rawResponse.path, contentDict: jsonDict)
             let result = Result<WebSocketResult>.success(value)
             self?.plugins.forEach { $0.willReceive(result, target: target) }
             completion(result)
             self?.plugins.forEach { $0.didReceive(result, target: target) }
         }
-        
+        return cancellable
     }
     
     
@@ -82,6 +82,10 @@ class WSProvider<Target: WSTargetType> {
 /// WebSocket API 请求工具
 struct WebSocketAPITool {
     
+    typealias FailureBlk = (_ error: WSResponseError) -> Void
+    typealias SuccessBlk = (_ dict: [AnyHashable: Any]) -> Void
+    
+    
     /// 发送请求
     ///
     /// - Parameters:
@@ -89,21 +93,31 @@ struct WebSocketAPITool {
     ///   - plugins: 请求插件
     ///   - failureBlk: 失败回调
     ///   - successBlk: 成功回调
+    @discardableResult
     static func request(target: WSTargetType,
                         plugins: [WSPluginType],
-                        failureBlk: ((_ error: WSResponseError?) -> Void)? = nil,
-                        successBlk: @escaping (_ resultDic: [AnyHashable: Any]) -> Void) {
+                        failureBlk: FailureBlk? = nil,
+                        successBlk: @escaping SuccessBlk) -> TaskCancellable? {
         
         let provider = WSProvider<WSMultiTarget>.init(plugins: plugins)
-        provider.request(WSMultiTarget(target)) { (result) in
+        return provider.request(WSMultiTarget(target)) { (result) in
             switch result {
             case let .success(response):
-                successBlk(response.content)
+                successBlk(response.contentDict)
             case let .failure(error):
-                failureBlk?(error as? WSResponseError)
+                let ns_err = (error as NSError)
+                let ws_err = (error as? WSResponseError) ?? WSResponseError(code: ns_err.code, desc: ns_err.localizedDescription)
+                failureBlk?(ws_err)
             }
         }
         
+    }
+}
+
+extension WebSocketAPITool {
+    /// 初始化配置
+    static func initConfig() {
+        _ = WSAccessLayer.shared
     }
 }
 

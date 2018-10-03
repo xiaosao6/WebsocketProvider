@@ -13,7 +13,7 @@ struct WebSocketResult {
     /// 接口路径
     let path: String?
     /// 返回json字典
-    let content: [AnyHashable: Any]
+    let contentDict: [AnyHashable: Any]
 }
 
 

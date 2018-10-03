@@ -30,9 +30,9 @@ class WSAPICommonPlugin: WSPluginType {
     func didReceive(_ result: Result<WebSocketResult>, target: WSTargetType) {
         switch result {
         case let .success(wsresult):
-            print("service:\(wsresult.path ?? ""),resultDict:\(wsresult.content.description)")
-            let code = wsresult.content["ret_code"] as? String ?? ""
-            let msg  = wsresult.content["ret_msg"]  as? String
+            print("service:\(wsresult.path ?? ""),resultDict:\(wsresult.contentDict.description)")
+            let code = wsresult.contentDict["ret_code"] as? String ?? ""
+            let msg  = wsresult.contentDict["ret_msg"]  as? String
             if (code != "0000") {
                 print("弹出toast提示:\(String(describing: msg))")
                 //TODO: -- 弹出toast错误提示

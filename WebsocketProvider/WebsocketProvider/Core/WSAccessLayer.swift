@@ -59,16 +59,18 @@ class WSAccessLayer: NSObject {
 
 //MARK: ------------------------ Public
 extension WSAccessLayer {
-    func sendRequest(_ request: WSRequest, completion: WSResponseCompletion?) {
+    @discardableResult
+    func sendRequest(_ request: WSRequest, completion: WSResponseCompletion?) -> TaskCancellable? {
         if !(connection.isConnected) { // 未连接状态
             let errType: WSErrorType = connection.isNetworkReachable ? .serverApiError : .reachableError
             let response = WSResponse.responseWith(uniqueId: request.uniqueId, path: request.header.path, errorType: errType)
             completion?(response) // 直接回调:连接错误
-            return
+            return nil
         }
-        guard let messageString = WSDataParser.buildRequest(request) else { return }
+        guard let messageString = WSDataParser.buildRequest(request) else { return nil }
         connection.sendMessage(messageString)
-        taskManager.insertRequest(request, completion: completion)
+        let cancellable = taskManager.insertRequest(request, completion: completion)
+        return cancellable
     }
 }
 
@@ -79,7 +81,9 @@ extension WSAccessLayer: WSConnectionObservable {
         
         let task = taskManager.getTaskWithId(response.uniqueId)
         DispatchWorkItem.gcdCancel(task: task?.timeOutBlk) // 取消超时
-        task?.completionBlk?(response) // 回调结果
+        if !(task?.isCancelled ?? false) { // 未被取消
+            task?.completionBlk?(response) // 回调结果
+        }
         taskManager.removeTaskWithId(response.uniqueId)
     }
     
@@ -89,11 +93,13 @@ extension WSAccessLayer: WSConnectionObservable {
     
     func onWebSocketClosed(_ client: WSWebSocketClient, error: Error?) {
         let taskSet = taskManager.getAllTasks()
-        taskSet.forEach { (task) in
+        for task in taskSet {
             let errType: WSErrorType = connection.isNetworkReachable ? .serverApiError : .reachableError
             let response = WSResponse.responseWith(uniqueId: task.request.uniqueId, path: task.request.header.path, errorType: errType)
             DispatchWorkItem.gcdCancel(task: task.timeOutBlk) // 取消超时
-            task.completionBlk?(response) // 回调结果
+            if !(task.isCancelled) {
+                task.completionBlk?(response) // 回调结果
+            }
         }
         taskManager.removeAllRequests()
     }
@@ -108,7 +114,9 @@ extension WSAccessLayer: WSTaskTimeoutDelegate {
     func websocketRequestDidTimeout(_ request: WSRequest) {
         let response = WSResponse.responseWith(uniqueId: request.uniqueId, path: request.header.path, errorType: .requestTimeout)
         let task = taskManager.getTaskWithId(request.uniqueId)
-        task?.completionBlk?(response) // 回调结果
+        if !(task?.isCancelled ?? false) { // 未被取消
+            task?.completionBlk?(response) // 回调结果
+        }
         taskManager.removeTaskWithId(request.uniqueId)
     }
 }

@@ -49,7 +49,7 @@ class WSWebSocketConnection {
     private let networkListener: NetworkListener
     
     /// 下一次心跳block
-    fileprivate var nextHeartbeatingBlk: DispatchWorkItem.CancelableBlock?
+    fileprivate var nextHeartbeatingBlk: DispatchWorkItem.CancellableBlock?
     
     
     init() {
