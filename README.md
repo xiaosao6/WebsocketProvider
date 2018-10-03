@@ -63,15 +63,15 @@ WebSocketAPITool.request(target: MyAPI.test, plugins: []) { (dict) in
     
     // 错误
     ErrorCode {
-        int code;    //错误码: 1=非法协议体; 2=服务繁忙; 3=服务内部错误; 4=请先登录; ...
-        String desc; //错误描述
+        "code": 2,        //错误码: 1=非法协议体; 2=服务繁忙; 3=服务内部错误; 4=请先登录;...
+        "desc": "服务繁忙" //错误描述
     }
     
     // 正常content示例
     content: {
-        String ret_code;  // 业务状态码,一般"0000"表示成功
-        String ret_msg;   // 业务提示语
-        // (Object or Array): result; // 业务相关的对象或数组
+        "ret_code": "0000",    // 业务状态码,一般"0000"表示成功
+        "ret_msg":  "操作成功", // 业务提示语
+        "result":   (Object or Array) // 业务相关的对象或数组
     }
 ```
 
