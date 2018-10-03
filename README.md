@@ -53,7 +53,7 @@ WebSocketAPITool.request(target: MyAPI.test, plugins: []) { (dict) in
 
 - 返回协议格式：
 
-```json
+```swift
     ErrorCode error;//顶层错误码，非业务错误，有错误时出现
     long uniqueId;  //原值返回
     String product; //原值返回
